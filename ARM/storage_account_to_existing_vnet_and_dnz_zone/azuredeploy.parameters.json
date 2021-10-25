@@ -1,0 +1,30 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccounts_name": {
+            "value": "stdwtdatalaketest"
+        },
+        "privateEndpointName":{
+            "value": "prv-teststorageendpoint"
+        },
+        "privateEndpointVnetName": {
+            "value": "vnet-pe-testing"
+        },
+        "privateEndpointVnetResourceGroupName": {
+            "value": "rg-PE-vnet"
+        },
+        "privateEndpointSubnetName":{
+            "value": "prvendpoints"
+        },
+        "privateDNSZoneSubscriptionId":{
+            "value": "<enter your sub ID here>"
+        },
+        "privateDNSZoneResourceGroupName":{
+            "value": "rg-privatednszonestesting"
+        },
+        "privateDNSZoneName":{
+            "value": "privatelink.blob.core.windows.net"
+        }
+    }
+}
