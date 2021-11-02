@@ -1,0 +1,23 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "name": {
+            "type": "string"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2018-09-01",
+            "type": "Microsoft.Network/privateDnsZones",
+            "name": "[parameters('name')]",
+            "location": "global",
+            "dependsOn": [],
+            "tags": {
+                "Customer": "DukeEnergy",
+                "Project": "Emissions"
+            },
+            "properties": {}
+        }
+    ]
+}
