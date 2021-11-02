@@ -1,0 +1,39 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resourceName": {
+            "value": "saprivateendpointdwt"
+        },
+        "resourceType": {
+            "value": "Microsoft.Storage/storageaccounts"
+        },
+        "resourceGroupTypeName": {
+            "value": "blob"
+        },
+        "privateEndpointName":{
+            "value": "prv-saprivateendpointdwt"
+        },
+        "targetVirtualNetworkName": {
+            "value": "DE_VN_EnterpriseDev"
+        },
+        "targetVnetResourceGroupName": {
+            "value": "rg-TemplateTests"
+        },
+        "targetSubnetName":{
+            "value": "DE_SN_App1"
+        },
+        "privateDNSZoneSubscriptionId":{
+            "value": "8cb739d8-d17c-497f-9ad6-e2c66848073a"
+        },
+        "privateDNSZoneResourceGroupName":{
+            "value": "rg-petemplatetest"
+        },
+        "privateDNSZoneName":{
+            "value": "privatelink-blob-core-windows-net"
+        },
+        "privateDNSZoneType":{
+            "value": "privatelink.blob.core.windows.net"
+        }
+    }
+}
