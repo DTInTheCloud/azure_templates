@@ -1,0 +1,24 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "disablePublicIp": {
+      "value": false
+    },
+    "workspaceName": {
+      "value": "dwtdatabricks_test"
+    },
+    "pricingTier": {
+      "value": "premium"
+    },
+    "customVirtualNetworkId": {
+        "value": "/subscriptions/8cb739d8-d17c-497f-9ad6-e2c66848073a/resourceGroups/rg-TemplateTests/providers/Microsoft.Network/virtualNetworks/DE_VN_EnterpriseDev"
+    },
+    "customPublicSubnetName": {
+        "value": "dbx-public-snet"
+    },
+    "customPrivateSubnetName": {
+        "value": "dbx-private-snet"
+    }
+  }
+}
