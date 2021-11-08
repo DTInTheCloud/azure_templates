@@ -4,6 +4,14 @@
     "parameters": {
         "name": {
             "type": "string"
+        },
+        "resourceTags": {
+            "type": "object",
+            "defaultValue": {
+                "Customer": "Duke Energy",
+                "Environment": "QA",
+                "Project": "Emissions"
+            }
         }
     },
     "resources": [
@@ -13,10 +21,7 @@
             "name": "[parameters('name')]",
             "location": "global",
             "dependsOn": [],
-            "tags": {
-                "Customer": "DukeEnergy",
-                "Project": "Emissions"
-            },
+            "tags": "[parameters('resourceTags')]",
             "properties": {}
         }
     ]
