@@ -1,0 +1,43 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "workspaceName": {
+      "value": "mlduke04422dwt"
+    },
+    "storageAccountName": {
+      "value": "saduke04442dwt"
+    },
+    "keyVaultName": {
+      "value": "kvduke04422dwt"
+    },
+    "applicationInsightsName": {
+      "value": "appi-duke04422dwt"
+    },
+    "machineLearningContainerRegistryName": {
+      "value": "acrduke04422dwt"
+    },
+    "landingZoneStorageSPClientId": {
+        "value": "f3b5c37e-3b00-4319-a816-0a977af13742"
+    },
+    "landingZoneStorageSPClientSecret": {
+        "value": "U~57Q~Rk5abCdMnCIgemgakCdehkljkDmvNlW"
+    },
+    "landingZoneStorageAccountName":{
+      "value": "dwtadlsg2testacct"
+    },
+    "landingZoneStorageContainerName": {
+      "value": "rawlanding"
+    },
+    "vnetResourceGroupName": {
+      "value": "rg-TemplateTests"
+    },
+    "vnetName": {
+      "value": "DE_VN_EnterpriseDev"
+    },
+    "subnetName": {
+      "value": "DE_SN_App1"
+    }
+
+  }
+}

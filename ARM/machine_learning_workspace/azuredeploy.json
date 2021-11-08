@@ -1,0 +1,613 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "workspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specifies the name of the Azure Machine Learning workspace."
+            }
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+                "description": "Specifies the location for all resources."
+            }
+        },
+        "storageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name for the storage account to be created and associated with the workspace."
+            }
+        },
+        "keyVaultName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name for the key vault to be created and associated with the workspace."
+            }
+        },
+        "applicationInsightsName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name for the application insights to be created and associated with the workspace."
+            }
+        },
+        "machineLearningContainerRegistryName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Azure Container Registry to be created for use by the Machine Learning resources"
+            }
+        },
+        "landingZoneStorageSPTenantID": {
+            "type": "string",
+            "defaultValue": "[subscription().tenantId]",
+            "metadata": {
+                "description": "Tenant ID for the service principal that has access to the storage account"
+            }
+        },
+        "landingZoneStorageSPClientId": {
+            "type": "string",
+            "metadata": {
+                "description": "Client ID (GUID) of the service principal with access to the storage account"
+            }
+        },
+        "landingZoneStorageSPClientSecret": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Client secret for the service principal with access to the storage account"
+            }
+        },
+        "landingZoneStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the storage account used as the data landing zone"
+            }
+        },
+        "landingZoneStorageContainerName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the blob container in the landing zone storage account"
+            }
+        },
+        "vnetResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the resource group where the virtual network is provisioned"
+            }
+        },
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the virtual network to be allowed access"
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the subnet containing resources to be allowed access"
+            }
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[parameters('storageAccountName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "StorageV2",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "routingPreference": {
+                    "routingChoice": "MicrosoftRouting",
+                    "publishMicrosoftEndpoints": false,
+                    "publishInternetEndpoints": false
+                },
+                "minimumTlsVersion": "TLS1_2",
+                "isHnsEnabled": false,
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [
+                        {
+                            "id": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]",
+                            "action": "Allow"
+                        }
+                    ],
+                    "ipRules": [
+                        {
+                            "value": "159.110.16.160/28",
+                            "action": "Allow"
+                        },
+                        {
+                            "value": "159.110.132.160/28",
+                            "action": "Allow"
+                        }
+                    ],
+                    "defaultAction": "Deny"
+                },
+                "encryption": {
+                    "services": {
+                        "blob": {
+                            "enabled": true
+                        },
+                        "file": {
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "supportsHttpsTrafficOnly": true
+            }
+        },
+        {
+            "type": "Microsoft.KeyVault/vaults",
+            "apiVersion": "2019-09-01",
+            "name": "[parameters('keyVaultName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "tenantId": "[subscription().tenantId]",
+                "sku": {
+                    "name": "standard",
+                    "family": "A"
+                },
+                "enableSoftDelete": true,
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "defaultAction": "Deny",
+                    "ipRules": [
+                        {
+                            "value": "159.110.16.160/28"
+                        },
+                        {
+                            "value": "159.110.132.160/28"
+                        }
+                    ]
+                },
+                "accessPolicies": [
+                    {
+                        "tenantId": "2ede383a-7e1f-4357-a846-85886b2c0c4d",
+                        "objectId": "667cf1a0-c671-46f8-aa2f-43bc5bd47d96",
+                        "permissions": {
+                            "keys": [
+                                "get",
+                                "list",
+                                "create"
+                            ],
+                            "secrets": [
+                                "get",
+                                "list",
+                                "delete",
+                                "set"
+                            ],
+                            "certificates": [],
+                            "storage": []
+                        }
+                    },
+                    {
+                        "tenantId": "2ede383a-7e1f-4357-a846-85886b2c0c4d",
+                        "objectId": "6ff158eb-6ac4-4c1b-89f6-8d958a6a36a4",
+                        "permissions": {
+                            "keys": [
+                                "get",
+                                "list",
+                                "update",
+                                "create",
+                                "import",
+                                "delete",
+                                "recover",
+                                "backup",
+                                "restore",
+                                "sign",
+                                "verify",
+                                "wrapKey",
+                                "unwrapKey",
+                                "encrypt",
+                                "decrypt"
+                            ],
+                            "secrets": [
+                                "get",
+                                "list",
+                                "set",
+                                "delete",
+                                "recover",
+                                "backup",
+                                "restore"
+                            ],
+                            "certificates": [
+                                "get",
+                                "list",
+                                "update",
+                                "create",
+                                "import",
+                                "delete",
+                                "recover",
+                                "backup",
+                                "restore",
+                                "managecontacts",
+                                "manageissuers",
+                                "getissuers",
+                                "listissuers",
+                                "setissuers",
+                                "deleteissuers"
+                            ],
+                            "storage": []
+                        }
+                    },
+                    {
+                        "tenantId": "2ede383a-7e1f-4357-a846-85886b2c0c4d",
+                        "objectId": "06014794-2133-42c2-95e8-ccb80edc35d3",
+                        "permissions": {
+                            "keys": [
+                                "get"
+                            ],
+                            "secrets": [
+                                "get",
+                                "list"
+                            ],
+                            "certificates": [],
+                            "storage": []
+                        }
+                    },
+                    {
+                        "tenantId": "2ede383a-7e1f-4357-a846-85886b2c0c4d",
+                        "objectId": "9fea533f-2155-4326-9294-4bfd6c71bc1c",
+                        "permissions": {
+                            "keys": [
+                                "get",
+                                "list",
+                                "update",
+                                "create",
+                                "import",
+                                "delete",
+                                "recover",
+                                "backup",
+                                "restore",
+                                "decrypt",
+                                "encrypt",
+                                "unwrapKey",
+                                "wrapKey",
+                                "verify",
+                                "sign",
+                                "all"
+                            ],
+                            "secrets": [
+                                "get",
+                                "list",
+                                "set",
+                                "delete",
+                                "recover",
+                                "backup",
+                                "restore",
+                                "all"
+                            ],
+                            "certificates": [
+                                "get",
+                                "list",
+                                "update",
+                                "create",
+                                "import",
+                                "delete",
+                                "recover",
+                                "backup",
+                                "restore",
+                                "managecontacts",
+                                "manageissuers",
+                                "getissuers",
+                                "listissuers",
+                                "setissuers",
+                                "deleteissuers",
+                                "all"
+                            ],
+                            "storage": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Insights/components",
+            "apiVersion": "2020-02-02-preview",
+            "name": "[parameters('applicationInsightsName')]",
+            "location": "[parameters('location')]",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web"
+            }
+        },
+        {
+            "type": "Microsoft.MachineLearningServices/workspaces",
+            "apiVersion": "2020-08-01",
+            "name": "[parameters('workspaceName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Insights/components', parameters('applicationInsightsName'))]",
+                "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]",
+                "[resourceId('Microsoft.ContainerRegistry/registries', parameters('machineLearningContainerRegistryName'))]",
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+            ],
+            "identity": {
+                "type": "systemAssigned"
+            },
+            "properties": {
+                "friendlyName": "[parameters('workspaceName')]",
+                "storageAccount": "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]",
+                "keyVault": "[resourceId('Microsoft.KeyVault/vaults', parameters('keyVaultName'))]",
+                "containerRegistry": "[resourceId('Microsoft.ContainerRegistry/registries', parameters('machineLearningContainerRegistryName'))]",
+                "applicationInsights": "[resourceId('Microsoft.Insights/components', parameters('applicationInsightsName'))]"
+            }
+        },
+        {
+            "type": "Microsoft.MachineLearningServices/workspaces/computes",
+            "apiVersion": "2018-11-19",
+            "name": "[concat(parameters('workspaceName'), '/azedcdev01')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaceName'))]"
+            ],
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "disableLocalAuth": false,
+                "computeType": "AmlCompute",
+                "computeLocation": "[parameters('location')]",
+                "properties": {
+                    "vmSize": "STANDARD_DS12_V2",
+                    "vmPriority": "Dedicated",
+                    "scaleSettings": {
+                        "maxNodeCount": 5,
+                        "minNodeCount": 0,
+                        "nodeIdleTimeBeforeScaleDown": "PT10M"
+                    },
+                    "subnet": {
+                        "id": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
+                    },
+                    "remoteLoginPortPublicAccess": "Disabled",
+                    "osType": "Linux",
+                    "isolatedNetwork": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.MachineLearningServices/workspaces/datastores",
+            "apiVersion": "2021-03-01-preview",
+            "name": "[concat(parameters('workspaceName'), '/landing_zone')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.MachineLearningServices/workspaces', parameters('workspaceName'))]"
+            ],
+            "properties": {
+                "contents": {
+                    "contentsType": "AzureDataLakeGen2",
+                    "accountName": "[parameters('landingZoneStorageAccountName')]",
+                    "containerName": "[parameters('landingZoneStorageContainerName')]",
+                    "endpoint": "core.windows.net",
+                    "protocol": "https",
+                    "credentials": {
+                        "credentialsType": "ServicePrincipal",
+                        "authorityUrl": "https://login.microsoftonline.com",
+                        "resourceUri": "https://storage.azure.com",
+                        "tenantId": "[parameters('landingZoneStorageSPTenantID')]",
+                        "clientId": "[parameters('landingZoneStorageSPClientId')]",
+                        "secrets": {
+                            "clientSecret": "[parameters('landingZoneStorageSPClientSecret')]"
+                        }
+                    }
+                },
+                "properties": {
+                    "ServiceDataAccessAuthIdentity": "WorkspaceSystemAssignedIdentity"
+                }
+            }
+        },
+        {
+            "name": "[parameters('machineLearningContainerRegistryName')]",
+            "type": "Microsoft.ContainerRegistry/registries",
+            "apiVersion": "2019-05-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Premium",
+                "tier": "Premium"
+            },
+            "properties": {
+                "adminUserEnabled": true,
+                "networkRuleSet": {
+                    "defaultAction": "Deny",
+                    "virtualNetworkRules": [
+                        {
+                            "action": "Allow",
+                            "id": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
+                        }
+                    ],
+                    "ipRules": [
+                        {
+                            "action": "Allow",
+                            "value": "20.44.19.64/26"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.44.22.0/24"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.44.23.0/24"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.49.102.128/26"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.65.0.0/24"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.70.146.88/29"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.70.150.0/24"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "52.167.106.80/29"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "52.167.110.0/24"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "104.208.144.80/29"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.36.248.85"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.41.0.240/28"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.62.61.128/28"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.70.146.192/28"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.70.154.161"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "52.167.106.160/28"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "52.177.164.219"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "104.208.144.160/28"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "13.77.80.138"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.41.5.224/27"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.70.147.224/27"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.84.49.170"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.84.62.82"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "52.167.106.128/27"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "104.208.144.128/27"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "104.208.156.99"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "104.208.157.18"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "104.210.3.254"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "137.116.33.5"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "137.116.33.29"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "137.116.33.71"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "137.116.37.146"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "137.116.46.180"
+                        }
+                    ]
+                },
+                "policies": {
+                    "quarantinePolicy": {
+                        "status": "disabled"
+                    },
+                    "trustPolicy": {
+                        "type": "Notary",
+                        "status": "enabled"
+                    },
+                    "retentionPolicy": {
+                        "days": 7,
+                        "status": "disabled"
+                    },
+                    "exportPolicy": {
+                        "status": "enabled"
+                    }
+                },
+                "encryption": {
+                    "status": "disabled"
+                },
+                "dataEndpointEnabled": true,
+                "publicNetworkAccess": "Enabled",
+                "networkRuleBypassOptions": "AzureServices",
+                "zoneRedundancy": "Disabled",
+                "anonymousPullEnabled": false
+            }
+        }
+    ],
+    "outputs": {
+        "workspaceName": {
+            "type": "string",
+            "value": "[parameters('workspaceName')]"
+        },
+        "storageAccountName": {
+            "type": "string",
+            "value": "[parameters('storageAccountName')]"
+        },
+        "keyVaultName": {
+            "type": "string",
+            "value": "[parameters('keyVaultName')]"
+        },
+        "applicationInsightsName": {
+            "type": "string",
+            "value": "[parameters('applicationInsightsName')]"
+        },
+        "containerRegistryName": {
+            "type": "string",
+            "value": "[parameters('machineLearningContainerRegistryName')]"
+        },
+        "location": {
+            "type": "string",
+            "value": "[parameters('location')]"
+        }
+    }
+}
