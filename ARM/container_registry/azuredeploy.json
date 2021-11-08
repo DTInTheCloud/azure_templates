@@ -1,0 +1,225 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "containerRegistryName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Azure Container Registry to be created for use by the Machine Learning resources"
+            }
+        },
+        "dedicatedDataEndpoint": {
+            "type": "bool",
+            "defaultValue": false,
+            "metadata": {
+                "description": "description"
+            }
+        },
+        "vnetResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the resource group where the virtual network is provisioned"
+            }
+        },
+        "vnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the virtual network to be allowed access"
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the subnet containing resources to be allowed access"
+            }
+        }
+    },
+    "resources": [
+        {
+            "name": "[parameters('containerRegistryName')]",
+            "type": "Microsoft.ContainerRegistry/registries",
+            "apiVersion": "2019-05-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Premium",
+                "tier": "Premium"
+            },
+            "properties": {
+                "adminUserEnabled": true,
+                "networkRuleSet": {
+                    "defaultAction": "Deny",
+                    "virtualNetworkRules": [
+                        {
+                            "action": "Allow",
+                            "id": "[resourceId(parameters('vnetResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets', parameters('vnetName'), parameters('subnetName'))]"
+                        }
+                    ],
+                    "ipRules": [
+                        {
+                            "action": "Allow",
+                            "value": "20.44.19.64/26"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.44.22.0/24"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.44.23.0/24"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.49.102.128/26"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.65.0.0/24"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.70.146.88/29"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.70.150.0/24"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "52.167.106.80/29"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "52.167.110.0/24"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "104.208.144.80/29"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.36.248.85"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.41.0.240/28"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.62.61.128/28"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.70.146.192/28"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.70.154.161"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "52.167.106.160/28"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "52.177.164.219"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "104.208.144.160/28"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "13.77.80.138"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "20.41.5.224/27"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.70.147.224/27"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.84.49.170"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "40.84.62.82"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "52.167.106.128/27"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "104.208.144.128/27"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "104.208.156.99"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "104.208.157.18"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "104.210.3.254"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "137.116.33.5"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "137.116.33.29"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "137.116.33.71"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "137.116.37.146"
+                        },
+                        {
+                            "action": "Allow",
+                            "value": "137.116.46.180"
+                        }
+                    ]
+                },
+                "policies": {
+                    "quarantinePolicy": {
+                        "status": "disabled"
+                    },
+                    "trustPolicy": {
+                        "type": "Notary",
+                        "status": "enabled"
+                    },
+                    "retentionPolicy": {
+                        "days": 7,
+                        "status": "disabled"
+                    },
+                    "exportPolicy": {
+                        "status": "enabled"
+                    }
+                },
+                "encryption": {
+                    "status": "disabled"
+                },
+                "dataEndpointEnabled": "[parameters('dedicatedDataEndpoint')]",
+                "publicNetworkAccess": "Enabled",
+                "networkRuleBypassOptions": "AzureServices",
+                "zoneRedundancy": "Disabled",
+                "anonymousPullEnabled": false
+            }
+        }
+    ],
+    "outputs": {
+        "containerRegistryName": {
+            "type": "string",
+            "value": "[parameters('containerRegistryName')]"
+        }
+    }
+}

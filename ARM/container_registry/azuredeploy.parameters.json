@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    
+    "containerRegistryName": {
+      "value": "acrduke04422dwt"
+    },
+    "dedicatedDataEndpoint": {
+        "value": true
+    },
+    "vnetResourceGroupName": {
+        "value": "rg-TemplateTests"
+    },
+    "vnetName": {
+        "value": "DE_VN_EnterpriseDev"
+    },
+    "subnetName": {
+        "value": "DE_SN_App1"
+    }
+  }
+}
